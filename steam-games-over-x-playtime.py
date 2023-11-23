@@ -16,7 +16,7 @@ def check_for_help_flag():
 
 def check_number_of_arguments():
     if len(sys.argv) != 4:
-        quantifier = 'few' if len(sys.argv) < 3 else 'many'
+        quantifier = 'few' if len(sys.argv) < 4 else 'many'
         raise Exception('Too ' + quantifier + ' arguments.')
 
 def check_x_minutes_argument(x_minutes):
