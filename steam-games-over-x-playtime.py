@@ -8,9 +8,9 @@ def check_for_help_flag():
     if len(sys.argv) == 1:
         raise Exception('No arguments supplied.')
     if sys.argv[1] in ['-h', '--help']:
-        print('\nCommand to run: py steam-games-over-x-playtime.py {steam web api key} {steamid} {x minutes}')
+        print('\nCommand to run: py steam-games-over-x-playtime.py {steam web api key} {steamids} {x minutes}')
         print('\n- Go to https://steamcommunity.com/dev for Steam Web API Key')
-        print('- {steamid} is the account\'s 64 bit SteamID')
+        print('- {steamids} are 64 bit SteamIDs separated by commas.')
         return True
     return False
 
@@ -45,15 +45,9 @@ def steam_web_api_GetPlayerSummaries(arguments):
     url = steam_web_api_url + 'ISteamUser/GetPlayerSummaries/v0002/' + arguments
     return attempt_json_load_from_steam_web_api_url(url)
 
-def get_persona_name(data):
-    return data['players'][0]['personaname']
-
 def steam_web_api_GetOwnedGames(arguments):
     url = steam_web_api_url + 'IPlayerService/GetOwnedGames/v0001/' + arguments
     return attempt_json_load_from_steam_web_api_url(url)
-
-def get_game_count(data):
-    return data['game_count']
 
 def get_game_count_over_x_minutes_playtime(data, x_minutes):
     count = 0
@@ -73,17 +67,20 @@ def main():
     steamids_url_argument = write_url_argument('steamids', sys.argv[2])
     steam_web_api_GetPlayerSummaries_url_arguments = steam_web_api_key_url_argument + steamids_url_argument
     steam_web_api_GetPlayerSummaries_data = steam_web_api_GetPlayerSummaries(steam_web_api_GetPlayerSummaries_url_arguments)
-    persona_name = get_persona_name(steam_web_api_GetPlayerSummaries_data)
 
-    steamid_url_argument = write_url_argument('steamid', sys.argv[2])
-    format_url_argument = write_url_argument('format', 'json')
-    steam_web_api_GetOwnedGames_url_arguments = steam_web_api_key_url_argument + steamid_url_argument + format_url_argument
-    steam_web_api_GetOwnedGames_data = steam_web_api_GetOwnedGames(steam_web_api_GetOwnedGames_url_arguments)
-    game_count = get_game_count(steam_web_api_GetOwnedGames_data)
-    game_count_over_x_minutes_playtime = get_game_count_over_x_minutes_playtime(steam_web_api_GetOwnedGames_data, x_minutes)
-    
-    rounded_percentage_of_games = round((game_count_over_x_minutes_playtime / game_count) * 100, 1)
-    print('\n{} owns {} of {} games ({}%) with over {} minutes of playtime.'.format(persona_name, game_count_over_x_minutes_playtime, game_count, rounded_percentage_of_games, x_minutes))
+    players = steam_web_api_GetPlayerSummaries_data['players']
+    for player in players:
+        persona_name = player['personaname']
+        steamid = player['steamid']
+        steamid_url_argument = write_url_argument('steamid', steamid)
+        format_url_argument = write_url_argument('format', 'json')
+        steam_web_api_GetOwnedGames_url_arguments = steam_web_api_key_url_argument + steamid_url_argument + format_url_argument
+        steam_web_api_GetOwnedGames_data = steam_web_api_GetOwnedGames(steam_web_api_GetOwnedGames_url_arguments)
+        game_count = steam_web_api_GetOwnedGames_data['game_count']
+        game_count_over_x_minutes_playtime = get_game_count_over_x_minutes_playtime(steam_web_api_GetOwnedGames_data, x_minutes)
+        
+        rounded_percentage_of_games = round((game_count_over_x_minutes_playtime / game_count) * 100, 1)
+        print('{}: {} owns {} of {} games ({}%) with over {} minutes of playtime.'.format(steamid, persona_name, game_count_over_x_minutes_playtime, game_count, rounded_percentage_of_games, x_minutes))
 
 if __name__ == '__main__':
     main()
