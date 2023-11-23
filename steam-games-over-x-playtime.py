@@ -9,7 +9,8 @@ def check_for_help_flag():
         return
     if sys.argv[1] in ['-h', '--help']:
         print('\nCommand to run: py steam-games-over-x-playtime.py {steam web api key} {steamid} {x minutes}')
-        print('\nGo to https://steamcommunity.com/dev for Steam Web API Key')
+        print('\n- Go to https://steamcommunity.com/dev for Steam Web API Key')
+        print('- {steamid} is the account\'s 64 bit SteamID')
         return True
     return False
 
