@@ -7,3 +7,5 @@ The [`steam-games-over-x-playtime.py`](./steam-games-over-x-playtime.py) Python 
 >You will need a valid Steam Web API Key from https://steamcommunity.com/dev
 
 Run `py steam-games-over-x-playtime.py {steam web api key} {steamid} {x minutes}`.
+
+`{steamid}` should be 64 bit SteamID.
